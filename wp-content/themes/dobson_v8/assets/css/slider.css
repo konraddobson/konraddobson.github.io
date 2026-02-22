@@ -1,0 +1,172 @@
+
+/* SLIDER */
+
+.slider {
+	position: relative;
+	width: 100%;
+	height: 100vh;
+	overflow: hidden;
+}
+
+.slider-container {
+	display: flex;
+	transition: transform 0.5s;
+	height: 100%;
+}
+
+.slider-slide {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	transition: opacity 0.5s ease-in-out;
+	visibility: hidden; /* Hide the slide by default */
+}
+
+.slide-active {
+	opacity: 1;
+	pointer-events: auto;
+	visibility: visible; /* Make the slide visible when active */
+}
+
+.slider-slide img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	cursor: pointer;
+}
+
+
+/* NAVIGATION */
+
+.slider-navigation {
+	position: absolute;
+	top: 50%;
+	left: 15px; /* Reduce the distance from the left screen edge */
+	right: 15px; /* Reduce the distance from the right screen edge */
+	transform: translateY(-50%);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	z-index: 1;
+}
+
+.slider-prev-btn,
+.slider-next-btn {
+	width: 25px; /* Increase the size of the black boxes by 20% */
+	height: 25px; /* Increase the size of the black boxes by 20% */
+	cursor: pointer;
+	fill: white; /* Change arrow color to white */
+	background-color: rgba(0, 0, 0, 0.6); /* Add black background color with transparency */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 0; /* Remove rounded corners */
+	padding: 6px; /* Increase padding to make the black boxes bigger */
+	opacity: 0.8;
+}
+
+.slider-prev-btn svg,
+.slider-next-btn svg {
+	width: 80%; /* Reduce arrow size by 20% */
+	height: 80%; /* Reduce arrow size by 20% */
+}
+
+.slider-prev-btn:hover,
+.slider-next-btn:hover {
+	opacity: 1; /* Adjust the hover opacity as desired */
+}
+
+
+/* PAGINATION */
+
+.slider-pagination {
+	position: absolute;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1;
+}
+
+.slider-dot {
+	width: 10px;
+	height: 10px;
+	background-color: white;
+	border-radius: 50%;
+	margin: 0 5px;
+	cursor: pointer;
+}
+
+.dot-active {
+	background-color: #1097ff;
+}
+
+
+/* CAPTIONS */
+
+.slider-caption {
+	position: absolute;
+	bottom: 60px;
+	left: 50%;
+	transform: translateX(-50%);
+	color: #fff;
+	text-align: center;
+	font-size: 16px;
+	background-color: rgba(0, 0, 0, 0.5);
+	padding: 7px 13px;
+}
+
+
+/* PROGRESS SLIDER */
+
+.slider-progress {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 4px;
+	background-color: #ddd;
+}
+
+.slider-progress .progress-bar {
+	height: 100%;
+	background-color: #1097ff;
+	transition: width 0.1s linear;
+}
+
+
+/* RESPONSIVE STYLES */
+
+@media (max-width: 767px) {
+	.slider {
+		height: calc(100vh - 120px);
+	}
+	.slider-caption {
+		bottom: 60px;
+	}
+	.slider-progress {
+		position: fixed;
+		top: 119px;
+	}
+}
+
+@media (max-width: 480px) {
+	.slider {
+		height: calc(100vh - 120px);
+	}
+	.slider-caption {
+		bottom: 150px;
+	}
+	.slider-navigation {
+		top: 35%;
+		transform: translateY(-35%);
+	}
+	.slider-pagination {
+		bottom: 120px;
+	}
+}
