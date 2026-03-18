@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electric Logo Preview</title>
+  <style>
+    :root {
+      --bg-1: #06153f;
+      --bg-2: #020816;
+      --logo-size: min(42vw, 420px);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(88, 146, 255, 0.18), transparent 20%),
+        radial-gradient(circle at 20% 20%, rgba(65, 120, 255, 0.16), transparent 26%),
+        radial-gradient(circle at 80% 22%, rgba(65, 120, 255, 0.12), transparent 24%),
+        linear-gradient(180deg, #071a47 0%, #020816 100%);
+      color: white;
+    }
+
+    .stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      place-items: center;
+      perspective: 1200px;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .grain {
+      position: absolute;
+      inset: -20%;
+      opacity: 0.05;
+      background-image: radial-gradient(rgba(255,255,255,0.7) 0.6px, transparent 0.6px);
+      background-size: 18px 18px;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .logo-wrap {
+      position: relative;
+      width: var(--logo-size);
+      aspect-ratio: 1000 / 1100;
+      transform-style: preserve-3d;
+      will-change: transform;
+      pointer-events: none;
+      contain: layout style;
+    }
+
+    .logo-wrap::before {
+      content: "";
+      position: absolute;
+      inset: -32%;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(160,225,255,0.42) 0%,
+        rgba(140,210,255,0.22) 22%,
+        rgba(120,190,255,0.08) 42%,
+        transparent 70%);
+      filter: blur(32px);
+      animation: auraPulse 4.8s ease-in-out infinite;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .logo-wrap::after {
+      content: "";
+      position: absolute;
+      inset: -90%;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(120,190,255,0.12) 0%,
+        rgba(120,190,255,0.06) 32%,
+        transparent 72%);
+      filter: blur(80px);
+      opacity: 0.34;
+      animation: outerPulse 6.6s ease-in-out infinite;
+      z-index: -3;
+      pointer-events: none;
+    }
+
+    svg.logo,
+    canvas.fx {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    canvas.fx {
+      image-rendering: auto;
+    }
+
+    svg.base-logo { z-index: 2; }
+    canvas.fx { z-index: 3; }
+
+    .logo-base {
+      fill: #ffffff;
+      stroke: rgba(255,255,255,1);
+      stroke-width: 10;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+
+    .core-glow {
+      fill: rgba(255,255,255,0.12);
+      stroke: rgba(180, 232, 255, 0.42);
+      stroke-width: 24;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      filter: blur(6px);
+    }
+
+    .hint {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.56);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .glitch-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 4;
+      mix-blend-mode: screen;
+      will-change: opacity, transform;
+    }
+
+    .glitch-red {
+      filter: none;
+    }
+
+    .glitch-blue {
+      filter: none;
+      opacity: 0;
+    }
+
+    .ghost-blue {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 3;
+      mix-blend-mode: screen;
+      will-change: opacity, transform, clip-path;
+    }
+
+    .ghost-blue .logo-base {
+      fill: rgba(80, 190, 255, 0.35);
+      stroke: rgba(80, 190, 255, 0.55);
+      stroke-width: 8;
+    }
+
+    
+
+    @keyframes auraPulse {
+      0%, 100% { transform: scale(0.98); opacity: 0.28; }
+      50% { transform: scale(1.05); opacity: 0.48; }
+    }
+
+    @keyframes outerPulse {
+      0%, 100% { transform: scale(0.96); opacity: 0.2; }
+      50% { transform: scale(1.06); opacity: 0.32; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <div class="grain"></div>
+
+    <div class="logo-wrap" id="logoWrap" aria-label="White logo with electric effect">
+      <svg class="logo base-logo" viewBox="0 0 1000 1100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill-rule="evenodd" clip-rule="evenodd">
+          <path class="core-glow" d="M201 248 L308 356 H692 L800 248 V520 L500 728 L201 520 Z M308 460 H692 L500 593 Z" />
+          <path class="core-glow" d="M201 612 V742 L500 951 L800 742 V612 L500 821 Z" />
+          <path class="logo-base" d="M201 248 L308 356 H692 L800 248 V520 L500 728 L201 520 Z M308 460 H692 L500 593 Z" />
+          <path class="logo-base" d="M201 612 V742 L500 951 L800 742 V612 L500 821 Z" />
+        </g>
+      </svg>
+      <svg class="glitch-layer glitch-red" viewBox="0 0 1000 1100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill-rule="evenodd" clip-rule="evenodd">
+          <path class="logo-base" d="M201 248 L308 356 H692 L800 248 V520 L500 728 L201 520 Z M308 460 H692 L500 593 Z" />
+          <path class="logo-base" d="M201 612 V742 L500 951 L800 742 V612 L500 821 Z" />
+        </g>
+      </svg>
+      <svg class="glitch-layer glitch-blue" viewBox="0 0 1000 1100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill-rule="evenodd" clip-rule="evenodd">
+          <path class="logo-base" d="M201 248 L308 356 H692 L800 248 V520 L500 728 L201 520 Z M308 460 H692 L500 593 Z" />
+          <path class="logo-base" d="M201 612 V742 L500 951 L800 742 V612 L500 821 Z" />
+        </g>
+      </svg>
+      <svg class="ghost-blue" id="ghostBlue" viewBox="0 0 1000 1100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill-rule="evenodd" clip-rule="evenodd">
+          <path class="logo-base" d="M201 248 L308 356 H692 L800 248 V520 L500 728 L201 520 Z M308 460 H692 L500 593 Z" />
+          <path class="logo-base" d="M201 612 V742 L500 951 L800 742 V612 L500 821 Z" />
+        </g>
+      </svg>
+      <canvas class="fx" id="fx" width="1000" height="1100"></canvas>
+    </div>
+
+    
+    <div class="hint">Move your cursor</div>
+  </main>
+
+  <script>
+    const logoWrap = document.getElementById('logoWrap');
+    const glitchLayers = document.querySelectorAll('.glitch-layer');
+    const ghostBlue = document.getElementById('ghostBlue');
+    const canvas = document.getElementById('fx');
+    const ctx = canvas.getContext('2d');
+
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = 1000;
+    const height = 1100;
+
+    const nodes = [
+      { x: 201, y: 248 }, { x: 308, y: 356 }, { x: 692, y: 356 }, { x: 800, y: 248 },
+      { x: 800, y: 520 }, { x: 500, y: 728 }, { x: 201, y: 520 }, { x: 201, y: 248 },
+      { x: 308, y: 460 }, { x: 692, y: 460 }, { x: 500, y: 593 }, { x: 308, y: 460 },
+      { x: 201, y: 612 }, { x: 201, y: 742 }, { x: 500, y: 951 }, { x: 800, y: 742 },
+      { x: 800, y: 612 }, { x: 500, y: 821 }, { x: 201, y: 612 }
+    ];
+
+    const paths = [
+      [0, 1, 2, 3, 4, 5, 6, 7],
+      [8, 9, 10, 11],
+      [12, 13, 14, 15, 16, 17, 18]
+    ];
+
+    const segments = [];
+    function buildSegments() {
+      segments.length = 0;
+      for (const path of paths) {
+        for (let i = 0; i < path.length - 1; i++) {
+          const a = nodes[path[i]];
+          const b = nodes[path[i + 1]];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const len = Math.hypot(dx, dy);
+          if (!len) continue;
+          segments.push({ a, b, dx, dy, len, nx: -dy / len, ny: dx / len, angle: Math.atan2(dy, dx) });
+        }
+      }
+    }
+    buildSegments();
+
+    function resizeCanvas() {
+      const mobile = window.innerWidth < 768;
+      dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.5);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const streamers = [];
+    const glints = [];
+    const streakSparks = [];
+    let lastTime = performance.now();
+    let flash = 0;
+    let ambientCharge = 0.18;
+    let nextPulseAt = 0;
+    let pulseBoost = 0;
+    let glitch = 0;
+    let ghost = 0;
+    let glitchBands = [];
+
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function pickSegment() {
+      return segments[(Math.random() * segments.length) | 0];
+    }
+
+    function pointOnSegment(seg, t, offset) {
+      return {
+        x: seg.a.x + seg.dx * t + seg.nx * (offset || 0),
+        y: seg.a.y + seg.dy * t + seg.ny * (offset || 0)
+      };
+    }
+
+    function spawnGlint(x, y, size) {
+      glints.push({ x, y, size: size || 1, age: 0, life: rand(0.12, 0.22) });
+    }
+
+    function spawnDotSpark(x, y, angle, major) {
+      const speed = major ? rand(180, 320) : rand(120, 220);
+      streakSparks.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        age: 0,
+        life: major ? rand(0.9, 1.4) : rand(0.6, 0.9),
+        size: major ? rand(3, 4.5) : rand(2, 3)
+      });
+    }
+
+    function createStreamer(opts) {
+      const options = opts || {};
+      const major = !!options.major;
+      const chainChance = options.chainChance == null ? 0.22 : options.chainChance;
+      const seg = options.seg || pickSegment();
+      const centerT = rand(0.08, 0.92);
+      const span = major ? rand(0.48, 0.82) : rand(0.22, 0.42);
+      const startT = Math.max(0.02, centerT - span * rand(0.45, 0.8));
+      const endT = Math.min(0.98, centerT + span * rand(0.45, 0.8));
+      const side = Math.random() < 0.5 ? -1 : 1;
+      const offset = rand(0.04, major ? 2.1 : 0.8) * side;
+      const root = pointOnSegment(seg, centerT, offset * 0.5);
+
+      streamers.push({
+        seg,
+        startT,
+        endT,
+        offset,
+        age: 0,
+        life: major ? rand(0.4, 0.68) : rand(0.2, 0.38),
+        jitter: major ? rand(1.5, 2.8) : rand(0.45, 1.05),
+        width: major ? rand(3.0, 5.4) : rand(1.35, 2.45),
+        detail: major ? ((Math.random() * 16 + 24) | 0) : ((Math.random() * 12 + 14) | 0),
+        brightness: major ? rand(1.18, 1.62) : rand(0.88, 1.18),
+        drift: rand(-0.015, 0.015),
+        branch: Math.random() < chainChance,
+        major
+      });
+
+      if (Math.random() < (major ? 0.28 : 0.12)) {
+        spawnGlint(root.x, root.y, major ? rand(1.2, 1.8) : rand(0.8, 1.2));
+      }
+
+      if (Math.random() < (major ? 0.8 : 0.4)) {
+        const count = major ? (1 + ((Math.random() * 2) | 0)) : 1;
+        for (let i = 0; i < count; i++) {
+          spawnDotSpark(root.x, root.y, seg.angle + rand(-1.2, 1.2), major);
+        }
+      }
+    }
+
+    function triggerPulse(now, intensity) {
+      const strong = intensity == null ? 1 : intensity;
+      pulseBoost = Math.max(pulseBoost, strong);
+      flash = Math.max(flash, 1.15 * strong);
+
+      const mobile = window.innerWidth < 768;
+      const primaryCount = Math.round((mobile ? 12 : 18) + strong * (mobile ? 8 : 12) + Math.random() * (mobile ? 5 : 8));
+      const majorCount = Math.round((mobile ? 4 : 7) + strong * (mobile ? 3 : 5) + Math.random() * (mobile ? 2 : 3));
+
+      for (let i = 0; i < primaryCount; i++) createStreamer({ chainChance: 0.54, major: false });
+      for (let i = 0; i < majorCount; i++) createStreamer({ chainChance: 0.72, major: true });
+
+      if (Math.random() < (mobile ? 0.45 : 0.78)) {
+        const sweeps = 1;
+        for (let s = 0; s < sweeps; s++) {
+          for (const seg of segments) {
+            if (Math.random() < 0.55) createStreamer({ chainChance: 0.5, major: Math.random() < 0.28, seg });
+          }
+        }
+      }
+
+      for (let i = 0; i < 3 + ((Math.random() * 4) | 0); i++) {
+        const n = nodes[(Math.random() * nodes.length) | 0];
+        spawnGlint(n.x, n.y, rand(0.9, 1.6));
+      }
+
+      glitch = Math.max(glitch, 1);
+      ghost = Math.max(ghost, 1);
+      glitchBands = [];
+      const bandCount = 2 + ((Math.random() * 2) | 0);
+      for (let i = 0; i < bandCount; i++) {
+        glitchBands.push({ y: rand(0.05, 0.95), h: rand(0.01, 0.035) });
+      }
+
+      nextPulseAt = now + rand(820, 1650);
+    }
+
+    function makeArcPoints(s, ageRatio) {
+      const points = [];
+      const count = Math.max(8, s.detail);
+      const tangentX = s.seg.dx / s.seg.len;
+      const tangentY = s.seg.dy / s.seg.len;
+
+      for (let i = 0; i <= count; i++) {
+        const p = i / count;
+        const t = s.startT + (s.endT - s.startT) * p + s.drift * ageRatio;
+        const envelope = Math.sin(p * Math.PI);
+        const phase = s.age * (s.major ? 26 : 18);
+        const n1 = Math.sin(i * 1.37 + phase + s.seg.a.x * 0.015);
+        const n2 = Math.sin(i * 3.1 - phase * 1.65 + s.seg.a.y * 0.012) * 0.6;
+        const n3 = Math.cos(i * 0.82 + phase * 0.55) * 0.32;
+        const offsetNoise = (n1 + n2 + n3) * s.jitter * envelope;
+        const tangentDrift = Math.sin((p - 0.5) * Math.PI) * s.seg.len * s.drift * 2;
+        points.push({
+          x: s.seg.a.x + s.seg.dx * t + s.seg.nx * (s.offset + offsetNoise) + tangentX * tangentDrift,
+          y: s.seg.a.y + s.seg.dy * t + s.seg.ny * (s.offset + offsetNoise) + tangentY * tangentDrift
+        });
+      }
+      return points;
+    }
+
+    function strokePath(points, widthPx, alpha, glow) {
+      if (points.length < 2) return;
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length - 1; i++) {
+        const mx = (points[i].x + points[i + 1].x) * 0.5;
+        const my = (points[i].y + points[i + 1].y) * 0.5;
+        ctx.quadraticCurveTo(points[i].x, points[i].y, mx, my);
+      }
+      ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+
+      ctx.shadowBlur = 30;
+      ctx.shadowColor = 'rgba(80,180,255,' + (glow * 1.2) + ')';
+      ctx.strokeStyle = 'rgba(80,180,255,' + (alpha * 0.46) + ')';
+      ctx.lineWidth = widthPx * 4.8;
+      ctx.stroke();
+
+      ctx.shadowBlur = 16;
+      ctx.shadowColor = 'rgba(170,228,255,' + (glow * 1.28) + ')';
+      ctx.strokeStyle = 'rgba(170,228,255,' + (alpha * 1.02) + ')';
+      ctx.lineWidth = widthPx * 2.9;
+      ctx.stroke();
+
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(255,255,255,' + (glow * 1.25) + ')';
+      ctx.strokeStyle = 'rgba(245,251,255,' + Math.min(1, alpha * 1.08) + ')';
+      ctx.lineWidth = widthPx * 1.35;
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,' + Math.min(1, alpha * 0.9) + ')';
+      ctx.lineWidth = Math.max(0.9, widthPx * 0.42);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBranch(origin, directionAngle, intensity) {
+      const pts = [origin];
+      let x = origin.x;
+      let y = origin.y;
+      let angle = directionAngle + rand(-0.45, 0.45);
+      const length = rand(20, 54) * intensity;
+      const steps = 4 + ((Math.random() * 4) | 0);
+      for (let i = 0; i < steps; i++) {
+        angle += rand(-0.34, 0.34);
+        x += Math.cos(angle) * (length / steps);
+        y += Math.sin(angle) * (length / steps);
+        pts.push({ x, y });
+      }
+      strokePath(pts, 0.7 + intensity * 0.42, 0.15 + intensity * 0.24, 0.16 + intensity * 0.2);
+    }
+
+    function drawCorona(time) {
+      for (const node of nodes) {
+        const pulse = 0.04 + (Math.sin(time * 0.0019 + node.x * 0.02 + node.y * 0.014) * 0.5 + 0.5) * (0.05 + pulseBoost * 0.06);
+        const r = 3.5 + pulse * 10 + flash * 0.9;
+        const grad = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r * 2.6);
+        grad.addColorStop(0, 'rgba(255,255,255,' + (0.08 + pulse * 0.9) + ')');
+        grad.addColorStop(0.2, 'rgba(190,232,255,' + (0.08 + pulse * 0.55) + ')');
+        grad.addColorStop(0.55, 'rgba(110,190,255,' + (0.04 + pulse * 0.22) + ')');
+        grad.addColorStop(1, 'rgba(110,190,255,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, r * 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawSurfaceCharge(time) {
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      for (const seg of segments) {
+        const shimmer = ambientCharge * (0.72 + (Math.sin(time * 0.0024 + seg.a.x * 0.03 + seg.a.y * 0.02) * 0.5 + 0.5) * 1.08) + pulseBoost * 0.22;
+        const grad = ctx.createLinearGradient(seg.a.x, seg.a.y, seg.b.x, seg.b.y);
+        grad.addColorStop(0, 'rgba(110,190,245,' + (shimmer * 0.18) + ')');
+        grad.addColorStop(0.2, 'rgba(180,230,255,' + (shimmer * 0.38) + ')');
+        grad.addColorStop(0.5, 'rgba(255,255,255,' + (shimmer * 0.48) + ')');
+        grad.addColorStop(0.8, 'rgba(180,230,255,' + (shimmer * 0.38) + ')');
+        grad.addColorStop(1, 'rgba(110,190,245,' + (shimmer * 0.18) + ')');
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.8 + shimmer * 1.25;
+        ctx.shadowBlur = 10 + shimmer * 14;
+        ctx.shadowColor = 'rgba(140,220,255,' + shimmer + ')';
+        ctx.beginPath();
+        ctx.moveTo(seg.a.x, seg.a.y);
+        ctx.lineTo(seg.b.x, seg.b.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawSoftFlash() {
+      if (flash <= 0.002) return;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      const grad = ctx.createRadialGradient(width * 0.5, height * 0.54, 0, width * 0.5, height * 0.54, 280 + flash * 180);
+      grad.addColorStop(0, 'rgba(255,255,255,' + (flash * 0.12) + ')');
+      grad.addColorStop(0.15, 'rgba(220,244,255,' + (flash * 0.2) + ')');
+      grad.addColorStop(0.35, 'rgba(160,220,255,' + (flash * 0.12) + ')');
+      grad.addColorStop(0.65, 'rgba(120,190,255,' + (flash * 0.06) + ')');
+      grad.addColorStop(1, 'rgba(120,190,255,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(width * 0.5, height * 0.54, 300 + flash * 170, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawGlints(dt) {
+      for (let i = glints.length - 1; i >= 0; i--) {
+        const g = glints[i];
+        g.age += dt;
+        if (g.age >= g.life) {
+          glints.splice(i, 1);
+          continue;
+        }
+        const a = 1 - g.age / g.life;
+        const s = 6 * g.size * (0.5 + a * 0.5);
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.shadowBlur = 16 * g.size;
+        ctx.shadowColor = 'rgba(180,235,255,' + (a * 0.8) + ')';
+        ctx.strokeStyle = 'rgba(255,255,255,' + a + ')';
+        ctx.lineWidth = Math.max(1, 1.2 * g.size * a);
+        ctx.beginPath();
+        ctx.moveTo(g.x - s, g.y);
+        ctx.lineTo(g.x + s, g.y);
+        ctx.moveTo(g.x, g.y - s);
+        ctx.lineTo(g.x, g.y + s);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function drawDotSparks(dt) {
+      for (let i = streakSparks.length - 1; i >= 0; i--) {
+        const s = streakSparks[i];
+        s.age += dt;
+        if (s.age >= s.life) {
+          streakSparks.splice(i, 1);
+          continue;
+        }
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        s.vx *= 0.992;
+        s.vy *= 0.992;
+        s.vy += 10 * dt;
+        const a = 1 - s.age / s.life;
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(180,235,255,' + (a * 0.55) + ')';
+        ctx.fillStyle = 'rgba(255,255,255,' + a + ')';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, Math.max(0.4, s.size * a), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function animate(time) {
+      const dt = Math.min(0.033, ((time - lastTime) / 1000) || 0.016);
+      lastTime = time;
+
+      if (!nextPulseAt) nextPulseAt = time + 500;
+      if (time >= nextPulseAt) triggerPulse(time, rand(0.85, 1.35));
+
+      flash *= 0.92;
+      pulseBoost *= 0.9;
+      glitch *= 0.85;
+      ghost *= 0.9;
+      ambientCharge += ((streamers.length > 0 ? 0.58 : 0.16) - ambientCharge) * 0.08;
+
+      ctx.clearRect(0, 0, width, height);
+      drawSurfaceCharge(time);
+
+      for (let i = streamers.length - 1; i >= 0; i--) {
+        const s = streamers[i];
+        s.age += dt;
+        if (s.age >= s.life) {
+          streamers.splice(i, 1);
+          continue;
+        }
+        const t = s.age / s.life;
+        const envelope = Math.sin(t * Math.PI);
+        const points = makeArcPoints(s, t);
+        strokePath(points, s.width * (0.78 + envelope * 0.3), (0.08 + envelope * 0.92) * s.brightness, 0.12 + envelope * 0.5);
+        if (s.branch && Math.random() < (s.major ? 0.055 : 0.018)) {
+          const p = points[(Math.random() * points.length) | 0];
+          const tangentAngle = s.seg.angle + (Math.random() < 0.5 ? -1 : 1) * rand(0.8, 1.2);
+          drawBranch(p, tangentAngle, s.major ? 1.0 : 0.72);
+        }
+      }
+
+      drawGlints(dt);
+      drawDotSparks(dt);
+      drawCorona(time);
+      drawSoftFlash();
+      requestAnimationFrame(animate);
+    }
+
+    let pointerX = window.innerWidth / 2;
+    let pointerY = window.innerHeight / 2;
+    let currentX = 0;
+    let currentY = 0;
+    let currentRotateX = 0;
+    let currentRotateY = 0;
+
+    const maxMove = window.innerWidth < 768 ? 36 : 90;
+    const maxRotate = window.innerWidth < 768 ? 5 : 10;
+    const easing = window.innerWidth < 768 ? 0.11 : 0.08;
+
+    function onPointerMove(event) {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+    }
+
+    window.onmousemove = onPointerMove;
+    window.onpointermove = onPointerMove;
+    document.onmousemove = onPointerMove;
+    document.onpointermove = onPointerMove;
+
+    function animateWrap() {
+      const nx = (pointerX - window.innerWidth * 0.5) / (window.innerWidth * 0.5);
+      const ny = (pointerY - window.innerHeight * 0.5) / (window.innerHeight * 0.5);
+      const targetX = Math.max(-1, Math.min(1, nx)) * maxMove;
+      const targetY = Math.max(-1, Math.min(1, ny)) * maxMove;
+      const targetRotateY = Math.max(-1, Math.min(1, nx)) * maxRotate;
+      const targetRotateX = Math.max(-1, Math.min(1, ny)) * -maxRotate;
+
+      currentX += (targetX - currentX) * easing;
+      currentY += (targetY - currentY) * easing;
+      currentRotateX += (targetRotateX - currentRotateX) * easing;
+      currentRotateY += (targetRotateY - currentRotateY) * easing;
+
+      const g = glitch * 6;
+      const jitterX = (Math.random() - 0.5) * g;
+      const jitterY = (Math.random() - 0.5) * g;
+      const scale = 1.03 + glitch * 0.03;
+      logoWrap.style.transform = 'translate3d(' + (currentX + jitterX) + 'px,' + (currentY + jitterY) + 'px,0) rotateX(' + currentRotateX + 'deg) rotateY(' + currentRotateY + 'deg) scale(' + scale + ')';
+
+      glitchLayers.forEach(function(el, i) {
+        const dir = i === 0 ? -1 : 1;
+        const localOpacity = Math.min(1, glitch * 1.2);
+        const offsetX = dir * (10 + Math.random() * 14) * glitch;
+        el.style.opacity = String(localOpacity);
+        el.style.transform = 'translate(' + offsetX + 'px,0px)';
+        if (glitchBands.length) {
+          const b = glitchBands[(Math.random() * glitchBands.length) | 0];
+          const top = b.y * 100;
+          const h = b.h * 100;
+          el.style.clipPath = 'polygon(0% ' + top + '%,100% ' + top + '%,100% ' + (top + h) + '%,0% ' + (top + h) + '%)';
+        } else {
+          el.style.clipPath = 'none';
+        }
+      });
+
+      if (glitch < 0.03) {
+        glitchLayers.forEach(function(el) {
+          el.style.opacity = '0';
+          el.style.transform = 'translate(0,0)';
+          el.style.clipPath = 'none';
+        });
+      }
+
+      const ghostOpacity = Math.min(0.45, ghost * 0.28);
+      const ghostX = 10 + ghost * 16;
+      const ghostY = (Math.random() - 0.5) * ghost * 6;
+      ghostBlue.style.opacity = String(ghostOpacity);
+      ghostBlue.style.transform = 'translate(' + ghostX + 'px,' + ghostY + 'px)';
+      if (ghost < 0.03) {
+        ghostBlue.style.opacity = '0';
+        ghostBlue.style.transform = 'translate(0,0)';
+      }
+
+      requestAnimationFrame(animateWrap);
+    }
+
+    requestAnimationFrame(animate);
+    requestAnimationFrame(animateWrap);
+  </script>
+</body>
+</html>
